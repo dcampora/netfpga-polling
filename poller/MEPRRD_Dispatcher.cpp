@@ -222,15 +222,15 @@ void MEPRRD_Dispatcher::updateAggregateRRD(int no_elems, list<MEPPacket*>::itera
         // cout << seqno << ", ";
         
         
-        time_t last_time = it_last->time;
+        time_t last_time = (*it_last)->time;
         if(seqno < _last_seqno){
             inserted = 0;
             for(list<pair<int, time_t> >::iterator it2 = ordered_seqnos.begin(); it2 != ordered_seqnos.end(); it2++){
                 if(it2->first > seqno){
                     if((*it1)->time < last_time)
-                        ordered_seqnos.insert(make_pair(seqno, (*it1)->time));
+                        ordered_seqnos.insert(it2, make_pair(seqno, (*it1)->time));
                     else
-                        ordered_seqnos.insert(make_pair(seqno, last_time));
+                        ordered_seqnos.insert(it2, make_pair(seqno, last_time));
                     inserted = 1;
                     break;
                 }
