@@ -85,6 +85,7 @@ public:
     bool processPacket(const struct pcap_pkthdr *header, const u_char *packet);
     
     time_t time;
+    int ns_timestamp;
 };
 
 #endif	/* UDP_HEADERS_H */

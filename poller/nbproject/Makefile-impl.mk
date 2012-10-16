@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=netfpga_listener
+PROJECTNAME=poller
 
 # Active Configuration
 DEFAULTCONF=Debug

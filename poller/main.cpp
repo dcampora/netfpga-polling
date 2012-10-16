@@ -8,8 +8,8 @@
 
 #include "Tools.h"
 #include "udp_headers.h"
-#include "UDPRRD_Dispatcher.h"
 #include "MEPRRD_Dispatcher.h"
+#include "MEPSQL_Dispatcher.h"
 #include "PacketCapture.h"
 
 #include "UDP_test.h"
@@ -85,12 +85,14 @@ int main(int argc, char **argv)
     
     
     /* Get a packet description and a dispatcher and let the magic begin :D */
-    GenericPacket* udp_packet_processor = new UDPPacket();
+    GenericPacket* packet_processor = new MEPPacket();
     
-    GenericDispatcher* udp_dispatcher = new MEPRRD_Dispatcher();
+    GenericDispatcher* db_dispatcher = new MEPSQL_Dispatcher();
+    GenericDispatcher* rrd_dispatcher = new MEPRRD_Dispatcher();
     // GenericDispatcher* udp_test_dispatcher = new UDP_test();
     
-    PacketCapture::addDispatcher(udp_packet_processor, udp_dispatcher);
+    PacketCapture::addDispatcher(packet_processor, rrd_dispatcher);
+    PacketCapture::addDispatcher(packet_processor, db_dispatcher);
     
     /* now we can set our callback function */
     pcap_loop(handle, num_packets, PacketCapture::capture, NULL);

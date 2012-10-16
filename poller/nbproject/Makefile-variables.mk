@@ -9,19 +9,19 @@ CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=GNU-Linux-x86
 CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux-x86
-CND_ARTIFACT_NAME_Debug=netfpga_listener
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/netfpga_listener
+CND_ARTIFACT_NAME_Debug=poller
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/poller
 CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Debug=netfpgalistener.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/netfpgalistener.tar
+CND_PACKAGE_NAME_Debug=poller.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/poller.tar
 # Release configuration
 CND_PLATFORM_Release=GNU-Linux-x86
 CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux-x86
-CND_ARTIFACT_NAME_Release=netfpga_listener
-CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/netfpga_listener
+CND_ARTIFACT_NAME_Release=poller
+CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/poller
 CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Release=netfpgalistener.tar
-CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/netfpgalistener.tar
+CND_PACKAGE_NAME_Release=poller.tar
+CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/poller.tar
 #
 # include compiler specific variables
 #

@@ -13,7 +13,7 @@ MEPRRD_Dispatcher::MEPRRD_Dispatcher(){
     _rrd_update_size = 20;
     _buffer_size = 20 + _rrd_update_size;
     _last_seqno = 0;
-    _granularity_divider = 1; // millisecond accuracy
+    _granularity_divider = 1; // second accuracy
     _containing_folder = "rrd//";
     
     /* RRD options
@@ -81,13 +81,13 @@ void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     pair<time_t, int> item;
     string update;
     
-    UDPPacket* packet = new UDPPacket(receivedPacket);
+    MEPPacket* packet = new MEPPacket(receivedPacket);
     
-    packet->time = time(&packet->timestamp.tv_sec) / _granularity_divider ; // ;
+    packet->time = time(&packet->timestamp.tv_sec); // ;
     _packet_ip = string(inet_ntoa(packet->ip->ip_dst));
     
     if(_last_seqno == 0){
-        _last_seqno = atoi((const char*) (packet->payload)) - 1;
+        _last_seqno = atoi((const char*) (packet->mep->seqno)) - 1;
         _last_rx_seqno = _last_seqno;
         _last_timestamp = packet->time;
         // TODO! :)
@@ -97,13 +97,13 @@ void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     
     // TODO:
     // Avoid garbage udp packets (the ones I don't want, for testing purposes)
-    // Garbage udp packets == those with a payload value of 0 or differing in more than say 500.
-    /* if(atoi((const char*) (packet->payload)) == 0 || (_last_rx_seqno + 500) < atoi((const char*) (packet->payload)))
+    // Garbage udp packets == those with a mep->seqno value of 0 or differing in more than say 500.
+    /* if(atoi((const char*) (packet->mep->seqno)) == 0 || (_last_rx_seqno + 500) < atoi((const char*) (packet->mep->seqno)))
         return; */
     
-    _last_rx_seqno = atoi((const char*) (packet->payload));
+    _last_rx_seqno = atoi((const char*) (packet->mep->seqno));
     
-    // cout << "payload: " << atoi((const char*)packet->payload) << endl;
+    // cout << "mep->seqno: " << atoi((const char*)packet->mep->seqno) << endl;
         
     
     /* Measure the MEP lost packets and update the rrd files for every statistic.
@@ -138,7 +138,7 @@ void MEPRRD_Dispatcher::updateDataSets(){
     // Grab all the elements up until the time (t) of the nth element with the
     // granularity we want.
     int i, no_elems = _rrd_update_size;
-    list<UDPPacket*>::iterator it_last = _packet_buffer.begin();
+    list<MEPPacket*>::iterator it_last = _packet_buffer.begin();
     
     for(i=0; i<no_elems; i++) it_last++;
     
@@ -163,11 +163,11 @@ void MEPRRD_Dispatcher::updateDataSets(){
 
 // Updates single IP RRDs (only for #mep)
 // with the info in the first no_elems from _packet_buffer.
-void MEPRRD_Dispatcher::updateIPSpecificRRDs(int no_elems, list<UDPPacket*>::iterator it_last){
+void MEPRRD_Dispatcher::updateIPSpecificRRDs(int no_elems, list<MEPPacket*>::iterator it_last){
     map<in_addr_t, map<time_t, int> > updates;
     in_addr temp;
     
-    for(list<UDPPacket*>::iterator it = _packet_buffer.begin(); it != it_last; it++){
+    for(list<MEPPacket*>::iterator it = _packet_buffer.begin(); it != it_last; it++){
         // fill in #mep
         createOrAddToEntry(updates, (*it), 1);
     }
@@ -190,21 +190,20 @@ void MEPRRD_Dispatcher::updateIPSpecificRRDs(int no_elems, list<UDPPacket*>::ite
 
 // TODO: Clean this code.
 // Updates the aggregate RRD with the info in the first no_elems from _packet_buffer.
-void MEPRRD_Dispatcher::updateAggregateRRD(int no_elems, list<UDPPacket*>::iterator it_last){
+void MEPRRD_Dispatcher::updateAggregateRRD(int no_elems, list<MEPPacket*>::iterator it_last){
     list<pair<time_t, pair<int, int> > > updates;
     vector<string> rrd_updates;
-    list<UDPPacket*>::iterator it;
+    list<MEPPacket*>::iterator it;
     
     // cout << "no of elems: " << no_elems << endl;
     // cout << "current last_seqno: " << _last_seqno << endl;
     
     // Fill updates:
     int prev_last_seqno = _last_seqno;
-    int j = 0;
     for(it = _packet_buffer.begin(); it != it_last; it++){
         // TODO: Change to MEP seqno
-        if(atoi((const char*)(*it)->payload) > _last_seqno)
-            _last_seqno = atoi((const char*)(*it)->payload);
+        if(atoi((const char*)(*it)->mep->seqno) > _last_seqno)
+            _last_seqno = atoi((const char*)(*it)->mep->seqno);
         
         // fill in #mep
         createOrAddToEntry(updates, (*it)->time, 1, 0);
@@ -216,25 +215,33 @@ void MEPRRD_Dispatcher::updateAggregateRRD(int no_elems, list<UDPPacket*>::itera
     list<pair<int, time_t> > ordered_seqnos;
     int seqno;
     bool inserted;
-    for(list<UDPPacket*>::iterator it1 = _packet_buffer.begin(); it1 != _packet_buffer.end(); it1++){
-        seqno = atoi((const char*)(*it1)->payload);
+    for(list<MEPPacket*>::iterator it1 = _packet_buffer.begin(); it1 != _packet_buffer.end(); it1++){
+        seqno = atoi((const char*)(*it1)->mep->seqno);
         
-        // cout << "payload: " << atoi((const char*) (*it1)->payload) << ", ";
+        // cout << "mep->seqno: " << atoi((const char*) (*it1)->mep->seqno) << ", ";
         // cout << seqno << ", ";
         
         
+        time_t last_time = it_last->time;
         if(seqno < _last_seqno){
             inserted = 0;
             for(list<pair<int, time_t> >::iterator it2 = ordered_seqnos.begin(); it2 != ordered_seqnos.end(); it2++){
                 if(it2->first > seqno){
-                    ordered_seqnos.insert(it2, make_pair(seqno, (*it1)->time));
+                    if((*it1)->time < last_time)
+                        ordered_seqnos.insert(make_pair(seqno, (*it1)->time));
+                    else
+                        ordered_seqnos.insert(make_pair(seqno, last_time));
                     inserted = 1;
                     break;
                 }
             }
 
-            if(inserted == 0)
-                ordered_seqnos.push_back(make_pair(seqno, (*it1)->time));
+            if(inserted == 0){
+                if((*it1)->time < last_time)
+                    ordered_seqnos.push_back(make_pair(seqno, (*it1)->time));
+                else
+                    ordered_seqnos.push_back(make_pair(seqno, last_time));
+            }
         }
     }
     
@@ -298,7 +305,7 @@ void MEPRRD_Dispatcher::createOrAddToEntry(list<pair<time_t, pair<int, int> > >&
 }
 
 void MEPRRD_Dispatcher::createOrAddToEntry(map<in_addr_t, map<time_t, int> >& updates,
-        UDPPacket* packet, int no_mep){
+        MEPPacket* packet, int no_mep){
     
     map<time_t, int> ip_map;
     

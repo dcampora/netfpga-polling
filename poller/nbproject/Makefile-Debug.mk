@@ -40,6 +40,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/tcp_headers.o \
 	${OBJECTDIR}/GenericPacket.o \
+	${OBJECTDIR}/MEPSQL_Dispatcher.o \
 	${OBJECTDIR}/PacketCapture.o \
 	${OBJECTDIR}/UDP_test.o \
 	${OBJECTDIR}/mep_headers.o \
@@ -60,15 +61,15 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-lpcap -lnet -lrrd
+LDLIBSOPTIONS=-lpcap -lnet -lrrd -lmysqlpp
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/netfpga_listener
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/poller
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/netfpga_listener: ${OBJECTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/poller: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/netfpga_listener ${OBJECTFILES} ${LDLIBSOPTIONS} 
+	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/poller ${OBJECTFILES} ${LDLIBSOPTIONS} 
 
 ${OBJECTDIR}/MEPRRD_Dispatcher.o: MEPRRD_Dispatcher.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -94,6 +95,11 @@ ${OBJECTDIR}/GenericPacket.o: GenericPacket.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/GenericPacket.o GenericPacket.cpp
+
+${OBJECTDIR}/MEPSQL_Dispatcher.o: MEPSQL_Dispatcher.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/MEPSQL_Dispatcher.o MEPSQL_Dispatcher.cpp
 
 ${OBJECTDIR}/PacketCapture.o: PacketCapture.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -121,7 +127,7 @@ ${OBJECTDIR}/udp_headers.o: udp_headers.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/netfpga_listener
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/poller
 
 # Subprojects
 .clean-subprojects:

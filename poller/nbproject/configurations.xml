@@ -5,6 +5,8 @@
       <itemPath>GenericDispatcher.h</itemPath>
       <itemPath>MEPRRD_Dispatcher.cpp</itemPath>
       <itemPath>MEPRRD_Dispatcher.h</itemPath>
+      <itemPath>MEPSQL_Dispatcher.cpp</itemPath>
+      <itemPath>MEPSQL_Dispatcher.h</itemPath>
       <itemPath>UDPRRD_Dispatcher.cpp</itemPath>
       <itemPath>UDPRRD_Dispatcher.h</itemPath>
       <itemPath>UDP_test.cpp</itemPath>
@@ -61,6 +63,7 @@
             <linkerOptionItem>-lpcap</linkerOptionItem>
             <linkerOptionItem>-lnet</linkerOptionItem>
             <linkerOptionItem>-lrrd</linkerOptionItem>
+            <linkerOptionItem>-lmysqlpp</linkerOptionItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>
