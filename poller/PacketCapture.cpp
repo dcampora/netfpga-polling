@@ -6,7 +6,8 @@ vector<pair<GenericPacket*, GenericDispatcher*> > PacketCapture::dispatch_queue;
 
 void PacketCapture::capture(u_char *args, const struct pcap_pkthdr *header, const u_char *packet){
     count++;
-    
+    bool processed = 0;
+ 
     // Dispatcher in action! :D
     for(int i=0; i<dispatch_queue.size(); i++){
         GenericPacket* packetProcesser = dispatch_queue[i].first;
@@ -14,12 +15,20 @@ void PacketCapture::capture(u_char *args, const struct pcap_pkthdr *header, cons
         
         if(packetProcesser->processPacket(header, packet)){
             // cout << "Processing a " << it->first->packet_type << " packet";
-            cout << ".";
-            cout << flush;
+            // cout << ".";
+            // cout << flush;
             
             dispatcher->dispatchPacket(packetProcesser);
-            return;
+            processed = 1;
+            // return;
         }
+    }
+
+    if(processed){
+        cout << ".";
+        cout << flush;
+
+        return;
     }
     
     cout << "x";

@@ -1,7 +1,5 @@
 
-
 #include "mep_headers.h"
-
 
 MEPPacket::MEPPacket(GenericPacket* packet){
     this->processPacket(packet->_header, packet->_packet);
@@ -46,14 +44,20 @@ bool MEPPacket::processPacket(const struct pcap_pkthdr* header, const u_char* pa
             case IPPROTO_IP:
                 protocol = "IP";
                 break;
+            case 253:
+                protocol = "MEP";
+                break;
         }
-    }
-    
-    if(protocol == " (not-IP)"){
-        mep = (struct MEPReq*)(_packet + SIZE_ETHERNET + size_ip);
+    }   
+ 
+    if(protocol == "MEP"){
+        // mep = (struct MEPReq*)(_packet + SIZE_ETHERNET + size_ip);
+        cout << header->len;
     }
     else {
-        // cerr << "Protocol specified is " << protocol << " (not UDP)" << endl;
+        int temp = ((int) ip->ip_p);
+        cerr << "Protocol specified is " << protocol  << " " << temp << endl;
+        
         return 0;
     }
     
