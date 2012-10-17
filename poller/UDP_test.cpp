@@ -10,14 +10,15 @@ void UDP_test::dispatchPacket(GenericPacket* receivedPacket){
     string update;
     
     UDPPacket* packet = new UDPPacket(receivedPacket);
+    delete packet;
     
     time_t arrival_time = time(&packet->timestamp.tv_sec);
     
-    cout << "payload size: " << packet->size_payload << endl;
+    // cout << "payload size: " << packet->size_payload << endl;
     
-    cout << "udp size: " << ntohs(packet->udp->ud_length) << endl;
+    // cout << "udp size: " << ntohs(packet->udp->ud_length) << endl;
     
-    cout << "payload: " << Tools::toString<const u_char*>(packet->payload) << endl;
+    // cout << "payload: " << Tools::toString<const u_char*>(packet->payload) << endl;
     
     
 }

@@ -8,7 +8,7 @@ GenericPacket::GenericPacket(GenericPacket* packet){
 
 GenericPacket::~GenericPacket(){
     free(_packet);
-    free(_header);
+    delete _header;
 }
 
 void GenericPacket::cloneHeaderAndPacket(const struct pcap_pkthdr* header, const u_char* packet){
