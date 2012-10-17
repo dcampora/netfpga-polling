@@ -84,7 +84,7 @@ void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     MEPPacket* packet = new MEPPacket(receivedPacket);
     
     packet->time = time(&packet->timestamp.tv_sec); // ;
-    _packet_ip = string(inet_ntoa(packet->ip->ip_dst));
+    _packet_ip = string(inet_ntoa(packet->ip->ip_src));
     
     if(_last_seqno == 0){
         _last_seqno = packet->mep->seqno - 1;
@@ -117,7 +117,7 @@ void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     // TODO: What? packet doesn't like the "inttostr" bit for some reason.
     // cout << _packet_ip << endl;
     if (_filenames.find(_packet_ip) == _filenames.end()){
-        // cout << Tools::inttostr(packet->ip->ip_dst.s_addr) << " ";
+        // cout << Tools::inttostr(packet->ip->ip_src.s_addr) << " ";
         createRRDFile(_pdp_step, _packet_ip, _options);
         _filenames.insert(_packet_ip);
     }
@@ -309,8 +309,8 @@ void MEPRRD_Dispatcher::createOrAddToEntry(map<in_addr_t, map<time_t, int> >& up
     
     map<time_t, int> ip_map;
     
-    if(updates.find(packet->ip->ip_dst.s_addr) != updates.end()){
-        ip_map = updates[packet->ip->ip_dst.s_addr];
+    if(updates.find(packet->ip->ip_src.s_addr) != updates.end()){
+        ip_map = updates[packet->ip->ip_src.s_addr];
         if(ip_map.find(packet->time) != ip_map.end())
             ip_map[packet->time] += no_mep;
         else
@@ -318,7 +318,7 @@ void MEPRRD_Dispatcher::createOrAddToEntry(map<in_addr_t, map<time_t, int> >& up
     }
     else {
         ip_map[packet->time] = no_mep;
-        updates[packet->ip->ip_dst.s_addr] = ip_map;
+        updates[packet->ip->ip_src.s_addr] = ip_map;
     }
 }
 
