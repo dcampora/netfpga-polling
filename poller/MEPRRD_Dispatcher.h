@@ -35,8 +35,7 @@ private:
     
     // list<pair<int, MEPPacket*> > _packet_buffer;
     list<MEPPacket*> _packet_buffer;
-    int _buffer_size;
-    int _rrd_update_size;
+    int _rrd_update_size, _buffer_size, _calculate_lost_meps_buff_size;
     int _granularity_divider;
     string _containing_folder;
     
@@ -44,6 +43,11 @@ private:
     vector<string> _options;
     set<string> _filenames;
     bool _with_IP_specific_RRDs;
+    
+    list<pair<time_t, pair<int, int> > > _aggregate_updates;
+    
+    // TODO
+    // map<vector<string> > _IP_specific_RRD_updates
     
 
 public:
@@ -56,6 +60,8 @@ public:
     void updateDataSets();
     void updateIPSpecificRRDs(int no_elems, list<MEPPacket*>::iterator it_last);
     void updateAggregateRRD(int no_elems, list<MEPPacket*>::iterator it_last);
+    
+    void convertAggregateRRDAndPostUpdate();
     
     void updateRRD(string filename, vector<string>& updates);
     

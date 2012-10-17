@@ -10,8 +10,11 @@
 /* Constructor - Generate RRD files */
 MEPRRD_Dispatcher::MEPRRD_Dispatcher(){
     _pdp_step = 1;
-    _rrd_update_size = 16000;
-    _buffer_size = 16000 + _rrd_update_size;
+    _rrd_update_size = 10; // Every n seconds
+    
+    _calculate_lost_meps_buff_size = 10;
+    _buffer_size = 10 + _calculate_lost_meps_buff_size;
+    
     _last_seqno = 0;
     _granularity_divider = 1; // second accuracy
     _containing_folder = "rrd//";
@@ -85,13 +88,10 @@ void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     MEPPacket* packet = new MEPPacket(receivedPacket);
     
     packet->time = time(&packet->timestamp.tv_sec); // ;
-    cout << packet->time << endl;
     _packet_ip = string(inet_ntoa(packet->ip->ip_src));
     
     if(_last_seqno == 0){
         _last_seqno = packet->mep->seqno - 1;
-        if(_last_seqno == -1)
-            _last_seqno = 0;
         _last_rx_seqno = _last_seqno;
         _last_timestamp = packet->time;
         // TODO! :)
@@ -127,11 +127,14 @@ void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     }
     
     // Insert elements in the list by arrival order
-    // gitano! tv_usec is in seconds boo
     _packet_buffer.push_back(packet);
     if(_packet_buffer.size() >= _buffer_size){
         updateDataSets();
     }
+    
+    // Post data for last _rrd_update_size seconds
+    if(_aggregate_updates.size() > _rrd_update_size)
+        convertAggregateRRDAndPostUpdate();
 }
 
 void MEPRRD_Dispatcher::updateDataSets(){
@@ -141,22 +144,10 @@ void MEPRRD_Dispatcher::updateDataSets(){
     
     // Grab all the elements up until the time (t) of the nth element with the
     // granularity we want.
-    int i, no_elems = _rrd_update_size;
+    int i, no_elems = _calculate_lost_meps_buff_size;
     list<MEPPacket*>::iterator it_last = _packet_buffer.begin();
     
     for(i=0; i<no_elems; i++) it_last++;
-    
-    time_t t = (*it_last)->time;
-    // cout << "Time comparing to is " << t << endl << "Updating: " << endl;
-    for(; it_last != _packet_buffer.end(); it_last++, i++){
-        // cout << i << " - " << (*it_last)->time << endl;
-        
-        if((*it_last)->time > t)
-            break;
-    }
-    no_elems = i;
-    
-    cout << no_elems << endl;
     
     // Update no_elems
     updateAggregateRRD(no_elems, it_last);
@@ -199,7 +190,7 @@ void MEPRRD_Dispatcher::updateIPSpecificRRDs(int no_elems, list<MEPPacket*>::ite
 // TODO: Clean this code.
 // Updates the aggregate RRD with the info in the first no_elems from _packet_buffer.
 void MEPRRD_Dispatcher::updateAggregateRRD(int no_elems, list<MEPPacket*>::iterator it_last){
-    list<pair<time_t, pair<int, int> > > updates;
+    // list<pair<time_t, pair<int, int> > > updates;
     vector<string> rrd_updates;
     list<MEPPacket*>::iterator it;
     
@@ -214,7 +205,7 @@ void MEPRRD_Dispatcher::updateAggregateRRD(int no_elems, list<MEPPacket*>::itera
             _last_seqno = (*it)->mep->seqno;
         
         // fill in #mep
-        createOrAddToEntry(updates, (*it)->time, 1, 0);
+        createOrAddToEntry(_aggregate_updates, (*it)->time, 1, 0);
     }
     
     // cout << "new last seqno: " << _last_seqno << endl;
@@ -264,7 +255,7 @@ void MEPRRD_Dispatcher::updateAggregateRRD(int no_elems, list<MEPPacket*>::itera
     for(list<pair<int, time_t> >::iterator seqit = ordered_seqnos.begin(); seqit!=ordered_seqnos.end(); seqit++){
         if( seqit->first > prev_seqno+1 ){
             // fill in #lost_mep
-            createOrAddToEntry(updates, seqit->second, 0, seqit->first-(prev_seqno+1));
+            createOrAddToEntry(_aggregate_updates, seqit->second, 0, seqit->first-(prev_seqno+1));
             
             /* if(seqit->first > prev_seqno+5){
                 cout << "Something weird happened:" << endl
@@ -274,9 +265,15 @@ void MEPRRD_Dispatcher::updateAggregateRRD(int no_elems, list<MEPPacket*>::itera
 
         prev_seqno = seqit->first;
     }
+}
+
+void MEPRRD_Dispatcher::convertAggregateRRDAndPostUpdate(){
+    vector<string> rrd_updates;
     
     // Convert updates to updateRRD format
-    for(list<pair<time_t, pair<int, int> > >::iterator upit = updates.begin(); upit != updates.end(); upit++){
+    list<pair<time_t, pair<int, int> > >::iterator last_item_pointer = _aggregate_updates.end();
+    last_item_pointer--;
+    for(list<pair<time_t, pair<int, int> > >::iterator upit = _aggregate_updates.begin(); upit != last_item_pointer; upit++){
         rrd_updates.push_back(string(
             Tools::toString<time_t>(upit->first) + ":" + Tools::toString<int>(upit->second.first) + ":" + 
             Tools::toString<int>(upit->second.second)
@@ -286,8 +283,12 @@ void MEPRRD_Dispatcher::updateAggregateRRD(int no_elems, list<MEPPacket*>::itera
     // Perform updates on aggregation rrd
     updateRRD(string("aggregation"), rrd_updates);
     
-    updates.clear();
+    pair<time_t, pair<int, int> > last_item = (*last_item_pointer);
+    
+    _aggregate_updates.clear();
     rrd_updates.clear();
+    
+    _aggregate_updates.push_front(last_item);
 }
 
 void MEPRRD_Dispatcher::createOrAddToEntry(list<pair<time_t, pair<int, int> > >& updates,
