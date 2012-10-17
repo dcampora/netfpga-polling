@@ -5,10 +5,6 @@ MEPPacket::MEPPacket(GenericPacket* packet){
     this->processPacket(packet->_header, packet->_packet);
 }
 
-MEPPacket::~MEPPacket(){
-    free(_packet);
-}
-
 bool MEPPacket::processPacket(const struct pcap_pkthdr* header, const u_char* packet){
     this->cloneHeaderAndPacket(header, packet);
     

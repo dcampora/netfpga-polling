@@ -6,6 +6,10 @@ GenericPacket::GenericPacket(GenericPacket* packet){
     this->processPacket(packet->_header, packet->_packet);
 }
 
+GenericPacket::~GenericPacket(){
+    free(_packet);
+}
+
 void GenericPacket::cloneHeaderAndPacket(const struct pcap_pkthdr* header, const u_char* packet){
     _header = new pcap_pkthdr;
     

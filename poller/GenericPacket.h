@@ -20,6 +20,7 @@ using namespace std;
 class GenericPacket {
 public:
     GenericPacket(){}
+    ~GenericPacket();
     GenericPacket(GenericPacket* packet);
     
     struct pcap_pkthdr* _header;
