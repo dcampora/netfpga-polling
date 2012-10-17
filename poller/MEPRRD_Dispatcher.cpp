@@ -21,7 +21,7 @@ MEPRRD_Dispatcher::MEPRRD_Dispatcher(){
     _with_IP_specific_RRDs = 0;
     
     temp = 10000;
-    counter = 0;
+    max_counter = 0;
     
     /* RRD options
      * DS - Data Source, RRA - RR Archive
@@ -102,8 +102,8 @@ void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     }
     
     counter++;
-    if(counter == temp){
-        counter = temp;
+    if(counter == max_counter){
+        counter = 0;
         cout << _aggregate_updates.size() << " " << _filenames.size() << " " << _options.size() << " " << _packet_buffer.size() << endl;
     }
     

@@ -42,6 +42,8 @@ private:
     int _buffer_size;
     int _db_update_size;
     
+    int counter, max_counter;
+    
 
 public:
     MEPSQL_Dispatcher();

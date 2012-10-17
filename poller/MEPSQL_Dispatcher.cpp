@@ -50,6 +50,13 @@ void MEPSQL_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     }
     
     
+    counter++;
+    if(counter == max_counter){
+        counter = 0;
+        cout << _packet_buffer.size() << endl;
+    }
+    
+    
     // TODO:
     // Avoid garbage udp packets (the ones I don't want, for testing purposes)
     // Garbage udp packets == those with a mep->seqno value of 0 or differing in more than say 500.
