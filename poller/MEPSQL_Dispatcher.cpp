@@ -42,7 +42,8 @@ void MEPSQL_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     _packet_ip = string(inet_ntoa(packet->ip->ip_dst));
     
     if(_last_seqno == 0){
-        _last_seqno = atoi((const char*) (packet->mep->seqno)) - 1;
+        _last_seqno = packet->mep->seqno - 1;
+        // _last_seqno = atoi((const char*) (packet->mep->seqno)) - 1;
         _last_rx_seqno = _last_seqno;
         // TODO! :)
         // _last_seqno = packet->mep->seqno - 1;
@@ -55,7 +56,8 @@ void MEPSQL_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     /*if(atoi((const char*) (packet->mep->seqno)) == 0 || (_last_rx_seqno + 500) < atoi((const char*) (packet->mep->seqno)))
         return; */
     
-    _last_rx_seqno = atoi((const char*) (packet->mep->seqno));
+    _last_rx_seqno = packet->mep->seqno;
+    // _last_rx_seqno = atoi((const char*) (packet->mep->seqno));
     
     // cout << "mep->seqno: " << atoi((const char*)packet->mep->seqno) << endl;
         
@@ -99,9 +101,10 @@ void MEPSQL_Dispatcher::updateSQL(list<MEPPacket*>::iterator it_last){
     // Fetch last seqno
     int prev_last_seqno = _last_seqno;
     for(it = _packet_buffer.begin(); it != it_last; it++){
-        // TODO: Change to MEP seqno
-        if(atoi((const char*)(*it)->mep->seqno) > _last_seqno)
-            _last_seqno = atoi((const char*)(*it)->mep->seqno);
+        if((*it)->mep->seqno > _last_seqno)
+             _last_seqno = (*it)->mep->seqno;
+        // if(atoi((const char*)(*it)->mep->seqno) > _last_seqno)
+        //     _last_seqno = atoi((const char*)(*it)->mep->seqno);
     }
     
     // Order seqno's received until _last_seqno
@@ -109,7 +112,8 @@ void MEPSQL_Dispatcher::updateSQL(list<MEPPacket*>::iterator it_last){
     int seqno;
     bool inserted;
     for(list<MEPPacket*>::iterator it1 = _packet_buffer.begin(); it1 != _packet_buffer.end(); it1++){
-        seqno = atoi((const char*)(*it1)->mep->seqno);
+        seqno = (*it1)->mep->seqno;
+        // seqno = atoi((const char*)(*it1)->mep->seqno);
         
         if(seqno < _last_seqno){
             inserted = 0;
