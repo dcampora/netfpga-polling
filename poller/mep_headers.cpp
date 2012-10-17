@@ -51,8 +51,14 @@ bool MEPPacket::processPacket(const struct pcap_pkthdr* header, const u_char* pa
     }   
  
     if(protocol == "MEP"){
-        // mep = (struct MEPReq*)(_packet + SIZE_ETHERNET + size_ip);
-        cout << header->len;
+        int mep_size = header->len - (SIZE_ETHERNET + size_ip);
+        if(mep_size == MEP_REQ_LEN){
+            mep = (struct MEPReq*)(_packet + SIZE_ETHERNET + size_ip);
+        }
+        else {
+            cerr << "Unexpected MEP size (" << mep_size << ")" << endl;
+            return 0;
+        }
     }
     else {
         int temp = ((int) ip->ip_p);
