@@ -20,8 +20,8 @@ MEPRRD_Dispatcher::MEPRRD_Dispatcher(){
     _containing_folder = "rrd//";
     _with_IP_specific_RRDs = 0;
     
-    temp = 10000;
-    max_counter = 0;
+    max_counter = 10000;
+    counter = 0;
     
     /* RRD options
      * DS - Data Source, RRA - RR Archive
