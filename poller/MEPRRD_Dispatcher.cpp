@@ -101,11 +101,11 @@ void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
         // _last_seqno = packet->mep->seqno - 1;
     }
     
-    counter++;
+    /* counter++;
     if(counter == max_counter){
         counter = 0;
         cout << _aggregate_updates.size() << " " << _filenames.size() << " " << _options.size() << " " << _packet_buffer.size() << endl;
-    }
+    } */
     
     // TODO:
     // Avoid garbage udp packets (the ones I don't want, for testing purposes)

@@ -50,11 +50,11 @@ void MEPSQL_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     }
     
     
-    counter++;
+    /* counter++;
     if(counter == max_counter){
         counter = 0;
         cout << _packet_buffer.size() << endl;
-    }
+    } */
     
     
     // TODO:
