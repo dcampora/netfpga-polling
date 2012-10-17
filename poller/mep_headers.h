@@ -27,6 +27,7 @@ class MEPPacket : public GenericPacket {
 public:
     // Clone constructor
     MEPPacket(){}
+    ~MEPPacket();
     MEPPacket(GenericPacket* packet);
     
     const struct sniff_ethernet *ethernet;  /* The ethernet header [1] */
