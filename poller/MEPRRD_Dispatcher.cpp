@@ -87,7 +87,7 @@ void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     _packet_ip = string(inet_ntoa(packet->ip->ip_dst));
     
     if(_last_seqno == 0){
-        _last_seqno = atoi((const char*) (packet->mep->seqno)) - 1;
+        _last_seqno = packet->mep->seqno - 1;
         _last_rx_seqno = _last_seqno;
         _last_timestamp = packet->time;
         // TODO! :)
@@ -101,7 +101,7 @@ void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     /* if(atoi((const char*) (packet->mep->seqno)) == 0 || (_last_rx_seqno + 500) < atoi((const char*) (packet->mep->seqno)))
         return; */
     
-    _last_rx_seqno = atoi((const char*) (packet->mep->seqno));
+    _last_rx_seqno = packet->mep->seqno;
     
     // cout << "mep->seqno: " << atoi((const char*)packet->mep->seqno) << endl;
         
@@ -202,8 +202,8 @@ void MEPRRD_Dispatcher::updateAggregateRRD(int no_elems, list<MEPPacket*>::itera
     int prev_last_seqno = _last_seqno;
     for(it = _packet_buffer.begin(); it != it_last; it++){
         // TODO: Change to MEP seqno
-        if(atoi((const char*)(*it)->mep->seqno) > _last_seqno)
-            _last_seqno = atoi((const char*)(*it)->mep->seqno);
+        if((*it)->mep->seqno > _last_seqno)
+            _last_seqno = (*it)->mep->seqno;
         
         // fill in #mep
         createOrAddToEntry(updates, (*it)->time, 1, 0);
@@ -216,7 +216,7 @@ void MEPRRD_Dispatcher::updateAggregateRRD(int no_elems, list<MEPPacket*>::itera
     int seqno;
     bool inserted;
     for(list<MEPPacket*>::iterator it1 = _packet_buffer.begin(); it1 != _packet_buffer.end(); it1++){
-        seqno = atoi((const char*)(*it1)->mep->seqno);
+        seqno = (*it1)->mep->seqno;
         
         // cout << "mep->seqno: " << atoi((const char*) (*it1)->mep->seqno) << ", ";
         // cout << seqno << ", ";
