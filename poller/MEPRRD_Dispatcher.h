@@ -46,6 +46,8 @@ private:
     
     list<pair<time_t, pair<int, int> > > _aggregate_updates;
     
+    int counter, temp;
+    
     // TODO
     // map<vector<string> > _IP_specific_RRD_updates
     

@@ -20,6 +20,9 @@ MEPRRD_Dispatcher::MEPRRD_Dispatcher(){
     _containing_folder = "rrd//";
     _with_IP_specific_RRDs = 0;
     
+    temp = 10000;
+    counter = 0;
+    
     /* RRD options
      * DS - Data Source, RRA - RR Archive
      * 
@@ -98,6 +101,11 @@ void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
         // _last_seqno = packet->mep->seqno - 1;
     }
     
+    counter++;
+    if(counter == temp){
+        counter = temp;
+        cout << _aggregate_updates.size() << " " << _filenames.size() << " " << _options.size() << " " << _packet_buffer.size() << endl;
+    }
     
     // TODO:
     // Avoid garbage udp packets (the ones I don't want, for testing purposes)
@@ -146,7 +154,6 @@ void MEPRRD_Dispatcher::updateDataSets(){
     // granularity we want.
     int i, no_elems = _calculate_lost_meps_buff_size;
     list<MEPPacket*>::iterator it_last = _packet_buffer.begin();
-    
     for(i=0; i<no_elems; i++) it_last++;
     
     // Update no_elems
