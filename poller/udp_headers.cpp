@@ -4,11 +4,11 @@
 
 UDPPacket::UDPPacket(GenericPacket* packet){
     // Assuming the packet is an UDPPacket
-    this->processPacket(packet->_header, packet->_packet);
+    processPacket(packet->_header, packet->_packet);
 }
 
 bool UDPPacket::processPacket(const struct pcap_pkthdr* header, const u_char* packet){
-    this->cloneHeaderAndPacket(header, packet);
+    cloneHeaderAndPacket(header, packet);
     
     // Generic type for all packets
     packet_type = "udp";

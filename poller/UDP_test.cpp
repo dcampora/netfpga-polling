@@ -9,7 +9,7 @@ void UDP_test::dispatchPacket(GenericPacket* receivedPacket){
     pair<time_t, int> item;
     string update;
     
-    UDPPacket* packet = new UDPPacket(receivedPacket);
+    MEPPacket* packet = new MEPPacket(receivedPacket);
     delete packet;
     
     time_t arrival_time = time(&packet->timestamp.tv_sec);

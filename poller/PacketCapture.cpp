@@ -22,6 +22,8 @@ void PacketCapture::capture(u_char *args, const struct pcap_pkthdr *header, cons
             processed = 1;
             // return;
         }
+        
+        packetProcesser->freePacketAndHeader();
     }
 
     if(processed){

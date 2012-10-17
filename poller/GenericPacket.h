@@ -27,6 +27,7 @@ public:
     u_char* _packet;
     
     void cloneHeaderAndPacket(const struct pcap_pkthdr* header, const u_char* packet);
+    void freePacketAndHeader();
     
     string packet_type;
     virtual bool processPacket(const struct pcap_pkthdr *header, const u_char *packet){}
