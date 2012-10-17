@@ -95,7 +95,8 @@ void MEPSQL_Dispatcher::updateDataSets(){
     updateSQL(it_last);
     
     // Remove and pop!
-    for(list<MEPPacket*>::iterator it = _packet_buffer.begin(), i=0; i<no_elems; it++, i++)
+    list<MEPPacket*>::iterator it;
+    for(it = _packet_buffer.begin(), i=0; i<no_elems; it++, i++)
         delete (*it);
     
     // Pop the first no_elems from the list
