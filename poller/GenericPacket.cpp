@@ -10,7 +10,7 @@ GenericPacket::~GenericPacket(){
     freePacketAndHeader();
 }
 
-GenericPacket::freePacketAndHeader(){
+void GenericPacket::freePacketAndHeader(){
     free(_packet);
     // _packet = NULL;
     delete _header;
@@ -22,9 +22,6 @@ void GenericPacket::cloneHeaderAndPacket(const struct pcap_pkthdr* header, const
     _header->caplen = header->caplen;
     _header->len = header->len;
     _header->ts = header->ts;
-    
-    cout << ".";
-    cout << flush;
     
     _packet = (u_char*) malloc(_header->len * sizeof(u_char));
     

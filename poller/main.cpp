@@ -91,9 +91,9 @@ int main(int argc, char **argv)
     GenericDispatcher* rrd_dispatcher = new MEPRRD_Dispatcher();
     GenericDispatcher* udp_test_dispatcher = new UDP_test();
     
-    // PacketCapture::addDispatcher(packet_processor, rrd_dispatcher);
-    // PacketCapture::addDispatcher(packet_processor, db_dispatcher);
-    PacketCapture::addDispatcher(packet_processor, udp_test_dispatcher);
+    PacketCapture::addDispatcher(packet_processor, rrd_dispatcher);
+    PacketCapture::addDispatcher(packet_processor, db_dispatcher);
+    // PacketCapture::addDispatcher(packet_processor, udp_test_dispatcher);
     
     /* now we can set our callback function */
     pcap_loop(handle, num_packets, PacketCapture::capture, NULL);
