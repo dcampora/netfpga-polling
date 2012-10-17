@@ -43,6 +43,7 @@ private:
     // vector<string> _updates;
     vector<string> _options;
     set<string> _filenames;
+    bool _with_IP_specific_RRDs;
     
 
 public:

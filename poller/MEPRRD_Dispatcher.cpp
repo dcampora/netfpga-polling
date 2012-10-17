@@ -15,6 +15,7 @@ MEPRRD_Dispatcher::MEPRRD_Dispatcher(){
     _last_seqno = 0;
     _granularity_divider = 1; // second accuracy
     _containing_folder = "rrd//";
+    _with_IP_specific_RRDs = 0;
     
     /* RRD options
      * DS - Data Source, RRA - RR Archive
@@ -116,7 +117,7 @@ void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     // If it's from a package we didn't receive before, create the RRD file:
     // TODO: What? packet doesn't like the "inttostr" bit for some reason.
     // cout << _packet_ip << endl;
-    if (_filenames.find(_packet_ip) == _filenames.end()){
+    if (_filenames.find(_packet_ip) == _filenames.end() && _with_IP_specific_RRDs){
         // cout << Tools::inttostr(packet->ip->ip_src.s_addr) << " ";
         createRRDFile(_pdp_step, _packet_ip, _options);
         _filenames.insert(_packet_ip);
@@ -154,7 +155,9 @@ void MEPRRD_Dispatcher::updateDataSets(){
     
     // Update no_elems
     updateAggregateRRD(no_elems, it_last);
-    updateIPSpecificRRDs(no_elems, it_last);
+    
+    if(_with_IP_specific_RRDs)
+        updateIPSpecificRRDs(no_elems, it_last);
     
     // Pop the first no_elems from the list
     for(int i=0; i<no_elems; i++)

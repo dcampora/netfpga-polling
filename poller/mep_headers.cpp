@@ -54,6 +54,7 @@ bool MEPPacket::processPacket(const struct pcap_pkthdr* header, const u_char* pa
         int mep_size = header->len - (SIZE_ETHERNET + size_ip);
         if(mep_size == MEP_REQ_LEN){
             mep = (struct MEPReq*)(_packet + SIZE_ETHERNET + size_ip);
+            cout << mep->seqno;
             
             // cout << "example " << hex << mep->nmep << " " << mep->runnumber << " " << mep->seqno << endl;
         }
