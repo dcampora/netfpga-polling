@@ -10,8 +10,8 @@
 /* Constructor - Generate RRD files */
 MEPRRD_Dispatcher::MEPRRD_Dispatcher(){
     _pdp_step = 1;
-    _rrd_update_size = 1000;
-    _buffer_size = 1000 + _rrd_update_size;
+    _rrd_update_size = 16000;
+    _buffer_size = 16000 + _rrd_update_size;
     _last_seqno = 0;
     _granularity_divider = 1; // second accuracy
     _containing_folder = "rrd//";
