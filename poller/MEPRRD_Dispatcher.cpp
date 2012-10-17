@@ -10,8 +10,8 @@
 /* Constructor - Generate RRD files */
 MEPRRD_Dispatcher::MEPRRD_Dispatcher(){
     _pdp_step = 1;
-    _rrd_update_size = 20;
-    _buffer_size = 20 + _rrd_update_size;
+    _rrd_update_size = 1000;
+    _buffer_size = 1000 + _rrd_update_size;
     _last_seqno = 0;
     _granularity_divider = 1; // second accuracy
     _containing_folder = "rrd//";
@@ -85,10 +85,13 @@ void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     MEPPacket* packet = new MEPPacket(receivedPacket);
     
     packet->time = time(&packet->timestamp.tv_sec); // ;
+    cout << packet->time << endl;
     _packet_ip = string(inet_ntoa(packet->ip->ip_src));
     
     if(_last_seqno == 0){
         _last_seqno = packet->mep->seqno - 1;
+        if(_last_seqno == -1)
+            _last_seqno = 0;
         _last_rx_seqno = _last_seqno;
         _last_timestamp = packet->time;
         // TODO! :)
@@ -152,6 +155,8 @@ void MEPRRD_Dispatcher::updateDataSets(){
             break;
     }
     no_elems = i;
+    
+    cout << no_elems << endl;
     
     // Update no_elems
     updateAggregateRRD(no_elems, it_last);

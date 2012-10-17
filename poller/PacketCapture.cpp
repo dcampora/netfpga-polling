@@ -25,8 +25,8 @@ void PacketCapture::capture(u_char *args, const struct pcap_pkthdr *header, cons
     }
 
     if(processed){
-        cout << ".";
-        cout << flush;
+        // cout << ".";
+        // cout << flush;
 
         return;
     }
