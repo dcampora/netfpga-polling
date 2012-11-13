@@ -357,7 +357,7 @@ void MEPRRD_Dispatcher::updateRRD(string filename, vector<string>& updates){
     for(vector<string>::iterator it = updates.begin(); it != updates.end(); it++)
         cout << (*it) << " ";
     cout << endl;
-
+    
     /* RRD update */
     int status = rrd_update_r(const_cast<const char*>(filename.c_str()),
         NULL, // ? cont char* _template

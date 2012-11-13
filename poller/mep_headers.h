@@ -37,8 +37,8 @@ public:
     int size_mep;
     
     // In the modified version of libpcap this is struct timespec
-    struct timespec timestamp;
-    // struct timeval timestamp;
+    // struct timespec timestamp;
+    struct timeval timestamp;
     
     // string packet_type;
     bool processPacket(const struct pcap_pkthdr *header, const u_char *packet);

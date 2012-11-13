@@ -35,6 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/MEPSQL_QuickDispatcher.o \
 	${OBJECTDIR}/MEPRRD_Dispatcher.o \
 	${OBJECTDIR}/UDPRRD_Dispatcher.o \
 	${OBJECTDIR}/main.o \
@@ -70,6 +71,11 @@ LDLIBSOPTIONS=-lpcap -lnet -lrrd -lmysqlpp
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/poller: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/poller ${OBJECTFILES} ${LDLIBSOPTIONS} 
+
+${OBJECTDIR}/MEPSQL_QuickDispatcher.o: MEPSQL_QuickDispatcher.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/MEPSQL_QuickDispatcher.o MEPSQL_QuickDispatcher.cpp
 
 ${OBJECTDIR}/MEPRRD_Dispatcher.o: MEPRRD_Dispatcher.cpp 
 	${MKDIR} -p ${OBJECTDIR}

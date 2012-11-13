@@ -120,7 +120,7 @@ void MEPSQL_Dispatcher::updateSQL(list<MEPPacket*>::iterator it_last){
     }
     
     // Order seqno's received until _last_seqno
-    list<pair<int, struct timespec> > ordered_seqnos;
+    list<pair<int, struct timeval> > ordered_seqnos;
     int seqno;
     bool inserted;
     for(list<MEPPacket*>::iterator it1 = _packet_buffer.begin(); it1 != _packet_buffer.end(); it1++){
@@ -129,7 +129,7 @@ void MEPSQL_Dispatcher::updateSQL(list<MEPPacket*>::iterator it_last){
         
         if(seqno < _last_seqno){
             inserted = 0;
-            for(list<pair<int, struct timespec> >::iterator it2 = ordered_seqnos.begin(); it2 != ordered_seqnos.end(); it2++){
+            for(list<pair<int, struct timeval> >::iterator it2 = ordered_seqnos.begin(); it2 != ordered_seqnos.end(); it2++){
                 if(it2->first > seqno){
                     ordered_seqnos.insert(it2, make_pair(seqno, (*it1)->timestamp));
                     inserted = 1;
@@ -144,14 +144,14 @@ void MEPSQL_Dispatcher::updateSQL(list<MEPPacket*>::iterator it_last){
     
     // Iterate seqnos and push updates to rrd for the lost ones
     int prev_seqno = prev_last_seqno;
-    for(list<pair<int, struct timespec> >::iterator seqit = ordered_seqnos.begin(); seqit!=ordered_seqnos.end(); seqit++){
+    for(list<pair<int, struct timeval> >::iterator seqit = ordered_seqnos.begin(); seqit!=ordered_seqnos.end(); seqit++){
         if( seqit->first > prev_seqno+1 ){
             
             for(int i=0; i<(seqit->first-(prev_seqno+1)); i++){
-                cout << "insert into " << table_name << " (id, timestamp_s, timestamp_ns) values (" << _current_id << ", " << seqit->second.tv_sec << ", " << seqit->second.tv_nsec << ")" << endl;
+                cout << "insert into " << table_name << " (id, timestamp_s, timestamp_ns) values (" << _current_id << ", " << seqit->second.tv_sec << ", " << seqit->second.tv_usec << ")" << endl;
                 
                 // fill in #lost_mep
-                query << "insert into " << table_name << " (id, timestamp_s, timestamp_ns) values (" << _current_id << ", " << seqit->second.tv_sec << ", " << seqit->second.tv_nsec << ")";
+                query << "insert into " << table_name << " (id, timestamp_s, timestamp_ns) values (" << _current_id << ", " << seqit->second.tv_sec << ", " << seqit->second.tv_usec << ")";
                 query.execute();
                 query.reset();
                 

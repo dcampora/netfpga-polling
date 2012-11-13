@@ -7,6 +7,8 @@
       <itemPath>MEPRRD_Dispatcher.h</itemPath>
       <itemPath>MEPSQL_Dispatcher.cpp</itemPath>
       <itemPath>MEPSQL_Dispatcher.h</itemPath>
+      <itemPath>MEPSQL_QuickDispatcher.cpp</itemPath>
+      <itemPath>MEPSQL_QuickDispatcher.h</itemPath>
       <itemPath>UDPRRD_Dispatcher.cpp</itemPath>
       <itemPath>UDPRRD_Dispatcher.h</itemPath>
       <itemPath>UDP_test.cpp</itemPath>
