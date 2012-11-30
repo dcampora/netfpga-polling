@@ -12,8 +12,8 @@ GenericPacket::~GenericPacket(){
 
 void GenericPacket::freePacketAndHeader(){
     free(_packet);
-    // _packet = NULL;
     delete _header;
+    // _packet = NULL;
 }
 
 void GenericPacket::cloneHeaderAndPacket(const struct pcap_pkthdr* header, const u_char* packet){
@@ -27,7 +27,7 @@ void GenericPacket::cloneHeaderAndPacket(const struct pcap_pkthdr* header, const
     
     string temp = string((char*)packet, _header->len);
     temp.copy((char*) _packet, _header->len, 0);
-    _packet[_header->len] = '\0';
+    // _packet[_header->len] = '\0';
     
     // cout << Tools::bitfield2bin<string>(temp, _header->len * 8) << endl;
 }

@@ -18,9 +18,11 @@
 struct MEPReq
 {
   u_int8_t nmep;   /* number of meps requested */
-  u_int32_t runnumber; /* last seen run-number */
-  u_int32_t seqno; /* sequence number of this MEP request */
-  u_int8_t reserved[MEP_REQ_LEN - sizeof(u_int8_t) - 2 * sizeof(u_int32_t)];
+  u_int8_t padding[3];
+  u_int32_t seqno; /* last seen run-number */
+  u_int32_t runnumber; /* sequence number of this MEP request */
+  u_int8_t timestamp[8];
+  
 };
 
 class MEPPacket : public GenericPacket {

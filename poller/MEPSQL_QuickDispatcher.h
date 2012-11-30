@@ -41,6 +41,8 @@ private:
     
     MEPPacket* _packet;
     
+    map<string, int> seqnos;
+    
     /*list<MEPPacket*> _packet_buffer;
     int _buffer_size;
     int _db_update_size;

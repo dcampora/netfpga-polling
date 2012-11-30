@@ -33,8 +33,8 @@ void PacketCapture::capture(u_char *args, const struct pcap_pkthdr *header, cons
         return;
     }
     
-    cout << "x";
-    cout << flush;
+    // cout << "x";
+    // cout << flush;
 }
 
 void PacketCapture::addDispatcher(GenericPacket* packet_headers, GenericDispatcher* dispatcher){
