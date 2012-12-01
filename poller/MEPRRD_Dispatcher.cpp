@@ -3,7 +3,8 @@
 
 /* TODO
  * 
- * check why the pop_front list is 25 (more than 20) (actually more than 1).
+ * TBB multithreading
+ * Consider timestamping from PF_RING
  * 
  */
 
@@ -110,13 +111,7 @@ void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     // Insert the elements in the specific vector or create it if it doesn't exist
     updateDataSets();
     
-    
     // Post data for last _rrd_update_size minutes
-    // TODO: Use TBB for doing this multithread multiawesome
-    /*
-    if(_aggregate_updates.size() > _rrd_update_size)
-        for(map::iterator it = lost_meps.begin(); it != lost_meps.end(); ++it)
-            updateIPSpecificRRDs((*it)); */
     
     int current_time = (time(NULL)); // / 60
     if(current_time - _starting_time > _rrd_update_size){
@@ -151,19 +146,32 @@ void MEPRRD_Dispatcher::removeOldieUpdates(){
 
 void MEPRRD_Dispatcher::updateAggregateRRD(){
     vector<string> updates;
+    map<int, pair<int, int> > updates_intermediate_format;
+
     for(map<string, map<int, int> >::iterator it = received_meps.begin(); it != received_meps.end(); ++it){
         string ip = it->first;
         
         for(map<int, int>::iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2){
             int time_mins = it2->first;
-            
-            if(time_mins < _max_update_time)
-                // updates string
-                updates.push_back(Tools::toString<int>(time_mins) + ":" + Tools::toString<int>(it2->second)
-                    + ":" + Tools::toString<int>(lost_meps[ip][time_mins]));
+
+            if(time_mins < _max_update_time){
+            	if(updates_intermediate_format.find(time_mins) == updates_intermediate_format.end())
+            		updates_intermediate_format[time_mins] = make_pair<int, int>(0, 0);
+
+            	updates_intermediate_format[time_mins].first += it2->first;
+            	updates_intermediate_format[time_mins].second += it2->second;
+            }
         }
     }
     
+    for(map<int, pair<int, int> >::iterator it = updates_intermediate_format.begin();
+    		it != updates_intermediate_format.end(); ++it){
+
+        // updates string
+        updates.push_back(Tools::toString<int>(it->first) + ":" + Tools::toString<int>(it->second.first)
+            + ":" + Tools::toString<int>(it->second.second));
+    }
+
     cout << "updates: " << updates.size() << endl;
     
     // Perform updates

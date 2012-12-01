@@ -23,7 +23,24 @@
 
 #include <arpa/inet.h>
 
+
 using namespace std;
+
+/* #include "tbb/tbb.h"
+using namespace tbb;
+
+class ParallelRRDWriting {
+    float *const my_a;
+public:
+    void operator()( const blocked_range<size_t>& r ) const {
+        float *a = my_a;
+        for( size_t i=r.begin(); i!=r.end(); ++i )
+           Foo(a[i]);
+    }
+    ApplyFoo( float a[] ) :
+        my_a(a)
+    {}
+}; */
 
 class MEPRRD_Dispatcher : public GenericDispatcher {
 private:
