@@ -42,6 +42,24 @@ public:
     {}
 }; */
 
+#include "tbb/tbb.h"
+
+class WriteRRDs : public tbb::task {
+	map<string, map<int, int> > _lost_meps;
+	map<string, map<int, int> > _received_meps;
+	string _containing_folder;
+	tbb::task* execute();
+
+public:
+	WriteRRDs(map<string, map<int, int> > lost_meps,
+			map<string, map<int, int> > received_meps,
+			int max_update_time);
+
+	void updateIPSpecificRRDs();
+    void updateAggregateRRD();
+    void updateRRD(string filename, vector<string>& updates);
+};
+
 class MEPRRD_Dispatcher : public GenericDispatcher {
 private:
     string _filename, _packet_ip;
@@ -76,16 +94,11 @@ public:
     MEPRRD_Dispatcher();
         
     void dispatchPacket(GenericPacket*);
-    
+
     void createRRDFile(int pdp_step, string filename, vector<string>& options);
-    
     void updateDataSets();
-    void updateIPSpecificRRDs();
-    void updateAggregateRRD();
-    
     void removeOldieUpdates();
     
-    void updateRRD(string filename, vector<string>& updates);
 };
 
 #endif	/* MEPRRD_DISPATCHER_H */

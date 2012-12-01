@@ -62,7 +62,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-lpcap -lnet -lrrd -lmysqlpp
+LDLIBSOPTIONS=-lpcap -lnet -lrrd -lmysqlpp -ltbb -L/home/dcampora/temp/tbb41_20121003oss/lib/intel64/cc4.1.0_libc2.4_kernel2.6.16.21
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
