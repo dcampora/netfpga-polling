@@ -87,11 +87,11 @@ void MEPRRD_Dispatcher::createRRDFile(int pdp_step, string filename, vector<stri
 void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     UDPPacket* packet = new UDPPacket(receivedPacket);
     
-    _packet_time = time(&packet->timestamp.tv_sec) / 60;
+    _packet_time = time(&packet->timestamp.tv_sec); // / 60;
     _packet_ip = string(inet_ntoa(packet->ip->ip_src));
     // TODO: Change this!
     // int* payday = (int*) (&packet->payload[0]);
-    // _packet_seqno = int(htonl(payday[0])); // packet->mep->seqno;
+    // _packet_seqno = int(htonl(packet->mep->seqno));
     _packet_seqno = ++counter + (rand() % 2);
     
     cout << _packet_time << " " << _packet_ip << " " << _packet_seqno << endl;
@@ -103,7 +103,7 @@ void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
         // cout << Tools::inttostr(packet->ip->ip_src.s_addr) << " ";
         
         // TODO: Uncomment!
-        // createRRDFile(_pdp_step, _packet_ip, _options);
+        createRRDFile(_pdp_step, _packet_ip, _options);
         _filenames.insert(_packet_ip);
     }
     
@@ -118,13 +118,14 @@ void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
         for(map::iterator it = lost_meps.begin(); it != lost_meps.end(); ++it)
             updateIPSpecificRRDs((*it)); */
     
-    int current_time = (time(NULL) / 60);
+    int current_time = (time(NULL)); // / 60
     if(current_time - _starting_time > _rrd_update_size){
         // Update until n minutes ago
         _max_update_time = current_time - _threshold_minutes;
         
         updateAggregateRRD();
-        
+        updateIPSpecificRRDs();
+
         // Remove the updated bits
         removeOldieUpdates();
         
@@ -171,7 +172,21 @@ void MEPRRD_Dispatcher::updateAggregateRRD(){
 
 
 void MEPRRD_Dispatcher::updateIPSpecificRRDs(){
-    
+    for(map<string, map<int, int> >::iterator it = received_meps.begin(); it != received_meps.end(); ++it){
+        vector<string> updates;
+        string ip = it->first;
+
+        for(map<int, int>::iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2){
+            int time_mins = it2->first;
+
+            if(time_mins < _max_update_time)
+                // updates string
+                updates.push_back(Tools::toString<int>(time_mins) + ":" + Tools::toString<int>(it2->second)
+                    + ":" + Tools::toString<int>(lost_meps[ip][time_mins]));
+        }
+
+        updateRRD(ip, updates);
+    }
 }
 
 void MEPRRD_Dispatcher::updateDataSets(){
