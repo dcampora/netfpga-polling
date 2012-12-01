@@ -25,6 +25,39 @@ WriteRRDs::WriteRRDs(map<string, map<int, int> > lost_meps,
 
 	_containing_folder = "rrd//";
 
+	/* RRD options
+	 * DS - Data Source, RRA - RR Archive
+	 *
+	 * We generate one pdp each '_pdp_step' number of seconds.
+	 * The value stored in each pdp is the <type> in the
+	 * RRA option.
+	 *
+	 * The number of RRAs stored is DS_options * RRA_options.
+	 *
+	 * DS:<name>:<type>:<heartbeat>:<min_val>:<max_val>
+	 * <type>: GAUGE | COUNTER
+	 *
+	 * RRA:<type>:<default_value>:<num_pdp>:<num_cdp>
+	 * <type>: AVERAGE | LAST
+	 */
+
+	/* Eg. of kind of thinking that needs to be done (not current settings).
+	 * (not now) 1m  60.000.000 (every us)
+	 * 1h   3.600.000 (every ms)
+	 * 3h         180 (every min)
+	 * 24h        288 (every 5 mins)
+	 */
+	_pdp_step = 60;
+    _options.push_back("DS:mep:GAUGE:120:0:U");
+    _options.push_back("DS:lost_mep:GAUGE:120:0:U");
+    _options.push_back("RRA:AVERAGE:0.5:1:10080"); // Per minute for one month
+    _options.push_back("RRA:AVERAGE:0.5:60:2160"); // Per hour for three months
+    _options.push_back("RRA:MAX:0.5:1:10080");
+    _options.push_back("RRA:MAX:0.5:60:2160");
+
+    if(!Tools::fileExists(_containing_folder + string("aggregation.rrd")))
+    	createRRD(_pdp_step, "aggregation", _options);
+
 	// Prepare the _lost_meps and _received_meps for the update
     for(map<string, map<int, int> >::iterator it = received_meps.begin(); it != received_meps.end(); ++it){
     	map<int, int> lost_copy;
@@ -112,7 +145,35 @@ void WriteRRDs::updateIPSpecificRRDs(){
                 + ":" + Tools::toString<int>(_lost_meps[ip][time_mins]));
         }
 
+        if(!Tools::fileExists(_containing_folder + ip + string(".rrd")))
+            createRRD(_pdp_step, ip, _options);
+
         updateRRD(ip, updates);
+    }
+}
+
+void WriteRRDs::createRRD(int pdp_step, string filename, vector<string>& options){
+    int status;
+    // filename = filename + ".rrd";
+    filename = _containing_folder + filename + ".rrd";
+
+    // Calc of argc and argv
+    char ** argv = NULL;
+    int argc = Tools::vec2arg(options, argv);
+
+    rrd_clear_error();
+
+    /* RRD create */
+    status = rrd_create_r (const_cast<const char*>(filename.c_str()),
+            pdp_step, NULL,
+            argc, (const char**) argv);
+
+    if (status != 0) {
+        cerr << "rrdtool plugin: rrd_create_r " << filename << " failed: "
+             << rrd_get_error() << endl;
+    }
+    else {
+        cout << "Created " << filename << endl;
     }
 }
 
@@ -121,76 +182,7 @@ MEPRRD_Dispatcher::MEPRRD_Dispatcher(){
     _pdp_step = 60;
     _rrd_update_size = 1; // Every n minutes
     _threshold_minutes = 0; // Update until threshold_minutes
-    
-    _calculate_lost_meps_buff_size = 10;
-    _buffer_size = 10 + _calculate_lost_meps_buff_size;
-    
-    _granularity_divider = 1; // second accuracy
-    _containing_folder = "rrd//";
-    _with_IP_specific_RRDs = 1;
-    
     _starting_time = 0;
-    
-    counter = 0;
-    max_counter = 10000;
-    
-    /* RRD options
-     * DS - Data Source, RRA - RR Archive
-     * 
-     * We generate one pdp each '_pdp_step' number of seconds.
-     * The value stored in each pdp is the <type> in the
-     * RRA option.
-     * 
-     * The number of RRAs stored is DS_options * RRA_options.
-     * 
-     * DS:<name>:<type>:<heartbeat>:<min_val>:<max_val>
-     * <type>: GAUGE | COUNTER
-     * 
-     * RRA:<type>:<default_value>:<num_pdp>:<num_cdp>
-     * <type>: AVERAGE | LAST
-     */
-    
-    /* Eg. of kind of thinking that needs to be done (not current settings).
-     * (not now) 1m  60.000.000 (every us)
-     * 1h   3.600.000 (every ms)
-     * 3h         180 (every min)
-     * 24h        288 (every 5 mins)
-     */
-   
-    _options.push_back("DS:mep:GAUGE:10:0:U");
-    _options.push_back("DS:lost_mep:GAUGE:10:0:U");
-    _options.push_back("RRA:AVERAGE:0.5:1:10080"); // Per minute for one month
-    _options.push_back("RRA:AVERAGE:0.5:60:2160"); // Per hour for three months
-    _options.push_back("RRA:MAX:0.5:1:10080");
-    _options.push_back("RRA:MAX:0.5:60:2160");
-    
-    createRRDFile(_pdp_step, "aggregation", _options);
-    // _options.pop_back();
-}
-
-void MEPRRD_Dispatcher::createRRDFile(int pdp_step, string filename, vector<string>& options){
-    int status;
-    // filename = filename + ".rrd";
-    filename = _containing_folder + filename + ".rrd";
-    
-    // Calc of argc and argv
-    char ** argv = NULL;
-    int argc = Tools::vec2arg(options, argv);
-    
-    rrd_clear_error();
-    
-    /* RRD create */
-    status = rrd_create_r (const_cast<const char*>(filename.c_str()),
-            pdp_step, NULL,
-            argc, (const char**) argv);
-    
-    if (status != 0) {
-        cerr << "rrdtool plugin: rrd_create_r " << filename << " failed: "
-             << rrd_get_error() << endl;
-    }
-    else {
-        cout << "Created " << filename << endl;
-    }
 }
 
 void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
@@ -209,13 +201,13 @@ void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
     if(_starting_time == 0)
         _starting_time = _packet_time;
     
-    if (_filenames.find(_packet_ip) == _filenames.end() && _with_IP_specific_RRDs){
+    /* if (_filenames.find(_packet_ip) == _filenames.end() && _with_IP_specific_RRDs){
         // cout << Tools::inttostr(packet->ip->ip_src.s_addr) << " ";
         
         // TODO: Uncomment!
-        createRRDFile(_pdp_step, _packet_ip, _options);
+        // createRRDFile(_pdp_step, _packet_ip, _options);
         _filenames.insert(_packet_ip);
-    }
+    } */
     
     // Insert the elements in the specific vector or create it if it doesn't exist
     updateDataSets();
@@ -283,7 +275,10 @@ void MEPRRD_Dispatcher::updateDataSets(){
         else {
             (*device_received_meps)[_packet_time]++;
             
-            if(_packet_seqno > last_seqnos[_packet_ip] + 1)
+            if(_packet_seqno > last_seqnos[_packet_ip] + 100)
+            	cout << " - " << _packet_ip << " reports outlier " << last_seqnos[_packet_ip] << " -> " << _packet_seqno;
+
+            else if(_packet_seqno > last_seqnos[_packet_ip] + 1)
                 (*device_lost_meps)[_packet_time] += _packet_seqno - last_seqnos[_packet_ip] - 1;
         }
     }

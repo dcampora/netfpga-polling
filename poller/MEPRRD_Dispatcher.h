@@ -49,6 +49,8 @@ class WriteRRDs : public tbb::task {
 	map<string, map<int, int> > _received_meps;
 	string _containing_folder;
 	tbb::task* execute();
+	vector<string> _options;
+	int _pdp_step;
 
 public:
 	WriteRRDs(map<string, map<int, int> > lost_meps,
@@ -58,6 +60,7 @@ public:
 	void updateIPSpecificRRDs();
     void updateAggregateRRD();
     void updateRRD(string filename, vector<string>& updates);
+    void createRRD(int pdp_step, string filename, vector<string>& options);
 };
 
 class MEPRRD_Dispatcher : public GenericDispatcher {
@@ -74,7 +77,6 @@ private:
     string _containing_folder;
     
     // vector<string> _updates;
-    vector<string> _options;
     set<string> _filenames;
     bool _with_IP_specific_RRDs;
     

@@ -14,6 +14,8 @@
 
 #include <cstdlib>
 
+#include <sys/stat.h>
+
 using namespace std;
 
 class Tools {
@@ -80,6 +82,13 @@ public:
                Tools::toString<int>( abs((int)addrc[1]) ) + "." +
                Tools::toString<int>( abs((int)addrc[2]) ) + "." +
                Tools::toString<int>( abs((int)addrc[3]) );
+    }
+
+    static bool fileExists(const string& filename){
+        struct stat buf;
+        if (stat(filename.c_str(), &buf) != -1)
+            return true;
+        return false;
     }
 };
 
