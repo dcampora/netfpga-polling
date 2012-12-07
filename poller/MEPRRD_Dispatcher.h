@@ -70,8 +70,8 @@ private:
     int _packet_seqno, _packet_time, _max_update_time,
         _threshold_minutes, _starting_time;
     
-    // list<pair<int, UDPPacket*> > _packet_buffer;
-    list<UDPPacket*> _packet_buffer;
+    // list<pair<int, MEPPacket*> > _packet_buffer;
+    list<MEPPacket*> _packet_buffer;
     int _rrd_update_size, _buffer_size, _calculate_lost_meps_buff_size;
     int _granularity_divider;
     string _containing_folder;

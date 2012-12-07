@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     char errbuf[PCAP_ERRBUF_SIZE];		/* error buffer */
     pcap_t *handle;				/* packet capture handle */
 
-    char *filter_exp = "ip[9] == 17";                    /* filter expression [3] */
+    char *filter_exp = "ip[9] == 253";                    /* filter expression [3] */
     struct bpf_program fp;			/* compiled filter program (expression) */
     bpf_u_int32 mask;                           /* subnet mask */
     bpf_u_int32 net;                            /* ip */
@@ -85,8 +85,8 @@ int main(int argc, char **argv)
     
     
     /* Get a packet description and a dispatcher and let the magic begin :D */
-    // GenericPacket* packet_processor = new MEPPacket();
-    GenericPacket* packet_processor = new UDPPacket();
+    GenericPacket* packet_processor = new MEPPacket();
+    // GenericPacket* packet_processor = new UDPPacket();
     
     // GenericDispatcher* db_dispatcher = new MEPSQL_QuickDispatcher();
     GenericDispatcher* rrd_dispatcher = new MEPRRD_Dispatcher();

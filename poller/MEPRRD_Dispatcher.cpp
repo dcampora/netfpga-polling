@@ -123,8 +123,8 @@ void WriteRRDs::updateAggregateRRD(){
     		it != updates_intermediate_format.end(); ++it){
 
         // updates string
-        updates.push_back(Tools::toString<int>(it->first) + ":" + Tools::toString<int>(it->second.first)
-            + ":" + Tools::toString<int>(it->second.second));
+        updates.push_back(Tools::toString<int>(it->first) + ":" + Tools::toString<int>(it->second.first / 60)
+            + ":" + Tools::toString<int>(it->second.second / 60));
     }
 
     // Perform updates
@@ -180,21 +180,21 @@ void WriteRRDs::createRRD(int pdp_step, string filename, vector<string>& options
 /* Constructor - Generate RRD files */
 MEPRRD_Dispatcher::MEPRRD_Dispatcher(){
     _pdp_step = 60;
-    _rrd_update_size = 1; // Every n minutes
-    _threshold_minutes = 0; // Update until threshold_minutes
+    _rrd_update_size = 10; // Every n minutes
+    _threshold_minutes = 2; // Update until threshold_minutes
     _starting_time = 0;
 }
 
 void MEPRRD_Dispatcher::dispatchPacket(GenericPacket* receivedPacket){
-    UDPPacket* packet = new UDPPacket(receivedPacket);
+    MEPPacket* packet = new MEPPacket(receivedPacket);
     
     _packet_time = time(&packet->timestamp.tv_sec); // / 60;
     _packet_time = _packet_time - _packet_time % 60;
     _packet_ip = string(inet_ntoa(packet->ip->ip_src));
     // TODO: Change this!
     // int* payday = (int*) (&packet->payload[0]);
-    // _packet_seqno = int(htonl(packet->mep->seqno));
-    _packet_seqno = ++counter + (rand() % 2);
+    _packet_seqno = packet->mep->seqno;
+    // _packet_seqno = ++counter + (rand() % 2);
     
     // cout << _packet_time << " " << _packet_ip << " " << _packet_seqno << endl;
     
@@ -276,7 +276,7 @@ void MEPRRD_Dispatcher::updateDataSets(){
             (*device_received_meps)[_packet_time]++;
             
             if(_packet_seqno > last_seqnos[_packet_ip] + 100)
-            	cout << " - " << _packet_ip << " reports outlier " << last_seqnos[_packet_ip] << " -> " << _packet_seqno;
+            	cout << " - " << _packet_ip << " reports outlier " << last_seqnos[_packet_ip] << " -> " << _packet_seqno << endl;
 
             else if(_packet_seqno > last_seqnos[_packet_ip] + 1)
                 (*device_lost_meps)[_packet_time] += _packet_seqno - last_seqnos[_packet_ip] - 1;
